@@ -1,20 +1,37 @@
 public class BAL {
-    private String lettre = "";
+    private String lettre = null;
     private static int boite = 1;
 
     public BAL(){}
 
-    public synchronized void write(String lettre) throws InterruptedException {
+    public synchronized void write(String lettre) {
         while (boite<=0){
-            wait();
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
         boite--;
+        this.lettre = lettre;
+        notifyAll();
     }
 
-    public synchronized void read(){
-        System.out.println(lettre);
+    public synchronized String read() {
+        while (boite>0){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        System.out.println(lettre + "\n");
+        String l = lettre;
+        lettre = null;
 
         boite++;
+        notifyAll();
+        return l;
     }
 
 }
